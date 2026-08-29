@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login · Hostel Management System</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+
+<div class="login-screen">
+
+  <!-- Left visual panel -->
+  <section class="login-visual">
+    <div class="lv-brand">
+      <div class="brand-mark">HK</div>
+      <div class="brand-text">
+        <div class="b-title" style="color:#fff;">Hostel Keep</div>
+        <div class="b-sub">Administrator Console</div>
+      </div>
+    </div>
+
+    <div class="lv-quote">
+      <h2>Every room has a story.<br><span class="accent">Keep every key accounted for.</span></h2>
+      <p>Manage residents, room allocations and fee collection from a single, calm dashboard built for hostel wardens.</p>
+
+      <div class="key-tag-showcase">
+        <span class="key-tag">204 — Occupied</span>
+        <span class="key-tag">311 — Available</span>
+        <span class="key-tag">Fees — Pending</span>
+      </div>
+    </div>
+
+    <div class="lv-foot">HOSTEL-MANAGEMENT-SYSTEM &middot; FRONTEND BUILD</div>
+  </section>
+
+  <!-- Right login card -->
+  <section class="login-panel">
+    <div class="login-card">
+      <div class="lc-eyebrow">Administrator Access</div>
+      <h1>Welcome back</h1>
+      <p class="lc-sub">Sign in to manage students, rooms and fees.</p>
+
+      <div class="login-error" id="loginError">
+        <span>&#9888;</span>
+        <span id="loginErrorText">Invalid username or password.</span>
+      </div>
+
+      <form class="login-form" id="loginForm" novalidate>
+        <div class="form-field" id="usernameField">
+          <label for="username">Username <span class="req">*</span></label>
+          <input type="text" id="username" name="username" placeholder="admin" autocomplete="username">
+          <span class="field-error">Please enter your username.</span>
+        </div>
+
+        <div class="form-field" id="passwordField">
+          <label for="password">Password <span class="req">*</span></label>
+          <div class="password-wrap">
+            <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password">
+            <button type="button" class="pw-toggle" id="pwToggle" aria-label="Show password">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <span class="field-error">Please enter your password.</span>
+        </div>
+
+        <div class="login-options">
+          <label class="remember-check">
+            <input type="checkbox" id="remember">
+            Remember me
+          </label>
+          <a href="#" class="forgot-link" id="forgotLink">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn btn-brass btn-login">Login</button>
+      </form>
+
+      <div class="login-hint">DEMO CREDENTIALS &middot; admin / admin123</div>
+    </div>
+  </section>
+
+</div>
+
+<script src="js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Students · Hostel Management System</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/students.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">HK</div>
+      <div class="brand-text">
+        <div class="b-title">Hostel Keep</div>
+        <div class="b-sub">Admin Console</div>
+      </div>
+    </div>
+
+    <nav>
+      <ul class="nav-list">
+        <li><a href="dashboard.html" class="nav-link">
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          Dashboard
+        </a></li>
+        <li><a href="students.html" class="nav-link active">
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Students
+        </a></li>
+        <li><a href="rooms.html" class="nav-link">
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21V8l9-5 9 5v13"/><path d="M3 21h18"/><path d="M9 21v-6h6v6"/></svg>
+          Rooms
+        </a></li>
+        <li><a href="fees.html" class="nav-link">
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Fees
+        </a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <ul class="nav-list">
+        <li><a href="login.html" class="nav-link" id="logoutLink">
+          <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Logout
+        </a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <div>
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle menu">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <div class="page-eyebrow">Residents</div>
+          <h1 class="page-title">Student Management</h1>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="admin-chip">
+          <div class="admin-avatar">AD</div>
+          <div>
+            <div class="a-name">Admin User</div>
+            <div class="a-role">Hostel Administrator</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      <div class="card">
+        <div class="card-body">
+
+          <div class="table-toolbar">
+            <div class="search-wrap">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="studentSearch" placeholder="Search by name, ID or room&hellip;">
+            </div>
+            <div class="toolbar-right">
+              <select id="statusFilter">
+                <option value="all">All Statuses</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Alumni">Alumni</option>
+              </select>
+              <select id="courseFilter">
+                <option value="all">All Courses</option>
+              </select>
+              <button class="btn btn-brass" id="addStudentBtn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Student
+              </button>
+            </div>
+          </div>
+
+          <div class="filter-pills" style="margin-bottom:16px;">
+            <button class="filter-pill active" data-gender="all">All Genders</button>
+            <button class="filter-pill" data-gender="Male">Male</button>
+            <button class="filter-pill" data-gender="Female">Female</button>
+            <button class="filter-pill" data-gender="Other">Other</button>
+          </div>
+
+          <div class="table-scroll">
+            <table id="studentTable">
+              <thead>
+                <tr>
+                  <th data-sort="id">Student ID <span class="sort-ico">&#8645;</span></th>
+                  <th data-sort="name">Name <span class="sort-ico">&#8645;</span></th>
+                  <th data-sort="gender">Gender <span class="sort-ico">&#8645;</span></th>
+                  <th data-sort="phone">Phone <span class="sort-ico">&#8645;</span></th>
+                  <th data-sort="email">Email <span class="sort-ico">&#8645;</span></th>
+                  <th data-sort="course">Course <span class="sort-ico">&#8645;</span></th>
+                  <th data-sort="year">Year <span class="sort-ico">&#8645;</span></th>
+                  <th data-sort="room">Room <span class="sort-ico">&#8645;</span></th>
+                  <th data-sort="status">Status <span class="sort-ico">&#8645;</span></th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="studentTableBody">
+                <!-- Populated by students.js from dummy data -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="empty-state" id="studentEmptyState" style="display:none;">
+            <div class="e-title">No students found</div>
+            <div class="e-sub">Try adjusting your search or filters.</div>
+          </div>
+
+          <div class="table-footer">
+            <span id="studentCount">0 students</span>
+            <div class="pager">
+              <button aria-label="Previous page">&lsaquo;</button>
+              <button class="active">1</button>
+              <button aria-label="Next page">&rsaquo;</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===================== ADD / EDIT STUDENT MODAL ===================== -->
+<div class="modal-overlay" id="studentModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="studentModalTitle">Add Student</h3>
+      <button class="modal-close" data-close-modal="studentModalOverlay">&times;</button>
+    </div>
+    <form id="studentForm" novalidate>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="f_studentId">Student ID <span class="req">*</span></label>
+            <input type="text" id="f_studentId" placeholder="STU-1001">
+            <span class="field-error">Student ID is required.</span>
+          </div>
+          <div class="form-field">
+            <label for="f_name">Full Name <span class="req">*</span></label>
+            <input type="text" id="f_name" placeholder="e.g. Ananya Rao">
+            <span class="field-error">Name is required.</span>
+          </div>
+          <div class="form-field">
+            <label for="f_gender">Gender <span class="req">*</span></label>
+            <select id="f_gender">
+              <option value="">Select gender</option>
+              <option>Male</option>
+              <option>Female</option>
+              <option>Other</option>
+            </select>
+            <span class="field-error">Please select a gender.</span>
+          </div>
+          <div class="form-field">
+            <label for="f_dob">Date of Birth</label>
+            <input type="date" id="f_dob">
+          </div>
+          <div class="form-field">
+            <label for="f_phone">Phone <span class="req">*</span></label>
+            <input type="tel" id="f_phone" placeholder="10-digit number">
+            <span class="field-error">Enter a valid 10-digit phone number.</span>
+          </div>
+          <div class="form-field">
+            <label for="f_email">Email <span class="req">*</span></label>
+            <input type="email" id="f_email" placeholder="name@example.com">
+            <span class="field-error">Enter a valid email address.</span>
+          </div>
+          <div class="form-field">
+            <label for="f_course">Course <span class="req">*</span></label>
+            <input type="text" id="f_course" placeholder="e.g. B.Tech CSE">
+            <span class="field-error">Course is required.</span>
+          </div>
+          <div class="form-field">
+            <label for="f_year">Year <span class="req">*</span></label>
+            <select id="f_year">
+              <option value="">Select year</option>
+              <option>1st Year</option>
+              <option>2nd Year</option>
+              <option>3rd Year</option>
+              <option>4th Year</option>
+            </select>
+            <span class="field-error">Please select a year.</span>
+          </div>
+          <div class="form-field full">
+            <label for="f_address">Address</label>
+            <textarea id="f_address" placeholder="Permanent address"></textarea>
+          </div>
+          <div class="form-field">
+            <label for="f_parentName">Parent Name</label>
+            <input type="text" id="f_parentName" placeholder="Parent / guardian name">
+          </div>
+          <div class="form-field">
+            <label for="f_parentPhone">Parent Phone</label>
+            <input type="tel" id="f_parentPhone" placeholder="10-digit number">
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="btn btn-outline" data-close-modal="studentModalOverlay">Cancel</button>
+        <button type="submit" class="btn btn-brass">Save Student</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== VIEW STUDENT MODAL ===================== -->
+<div class="modal-overlay" id="viewModalOverlay">
+  <div class="modal view-modal">
+    <div class="modal-head">
+      <h3>Student Profile</h3>
+      <button class="modal-close" data-close-modal="viewModalOverlay">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="view-head">
+        <div class="view-avatar" id="viewAvatar">--</div>
+        <div>
+          <div class="view-name" id="viewName">&mdash;</div>
+          <div class="view-id" id="viewId">&mdash;</div>
+        </div>
+      </div>
+      <div class="view-details" id="viewDetails">
+        <!-- Populated by students.js -->
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-outline" data-close-modal="viewModalOverlay">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== DELETE CONFIRM MODAL ===================== -->
+<div class="modal-overlay" id="confirmModalOverlay">
+  <div class="modal modal-sm">
+    <div class="modal-body">
+      <div class="confirm-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <h3>Delete this student?</h3>
+      <p class="confirm-text" id="confirmText">This will permanently remove the student record. This action cannot be undone.</p>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-outline" data-close-modal="confirmModalOverlay">Cancel</button>
+      <button type="button" class="btn btn-danger" id="confirmDeleteBtn" style="background:var(--rust); color:#fff;">Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toastStack"></div>
+
+<script src="js/students.js"></script>
+</body>
+</html>

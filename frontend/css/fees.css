@@ -1,0 +1,24 @@
+/* =========================================================
+   FEE MANAGEMENT PAGE
+   ========================================================= */
+
+.fee-summary-grid{
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 22px;
+}
+
+.amount-cell{ font-family: var(--font-mono); font-weight: 600; color: var(--ink); }
+.due-cell.overdue{ color: var(--rust); font-weight: 600; }
+
+.history-list{ display: flex; flex-direction: column; gap: 0; }
+.hist-row{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 13px 0; border-bottom: 1px solid var(--line); font-size: 13px;
+}
+.hist-row:last-child{ border-bottom: none; }
+.hist-left .h-title{ font-weight: 600; color: var(--ink); }
+.hist-left .h-sub{ font-size: 11.5px; color: var(--slate); font-family: var(--font-mono); margin-top: 2px; }
+.hist-amount{ font-family: var(--font-mono); font-weight: 700; color: var(--teal); }
+
+@media (max-width: 900px){
+  .fee-summary-grid{ grid-template-columns: repeat(2,1fr); }
+}

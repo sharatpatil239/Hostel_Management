@@ -1,0 +1,46 @@
+/* =========================================================
+   STUDENT MANAGEMENT PAGE
+   ========================================================= */
+
+.filter-pills{
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.filter-pill{
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 7px 13px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--slate);
+  cursor: pointer;
+}
+.filter-pill.active{
+  background: var(--ink); color: #fff; border-color: var(--ink);
+}
+
+.view-modal .view-head{
+  display: flex; align-items: center; gap: 14px;
+}
+.view-avatar{
+  width: 56px; height: 56px; border-radius: 14px;
+  background: linear-gradient(155deg, var(--brass) 0%, var(--brass-deep) 100%);
+  color: #26190A; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 20px; flex-shrink: 0;
+}
+.view-name{ font-size: 17px; font-family: var(--font-display); font-weight: 600; }
+.view-id{ font-family: var(--font-mono); font-size: 11.5px; color: var(--slate); margin-top: 2px; }
+
+.view-details{
+  margin-top: 20px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px;
+}
+.vd-item .vd-label{
+  font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--slate); font-weight: 700; margin-bottom: 4px;
+}
+.vd-item .vd-value{ font-size: 13.5px; color: var(--ink); font-weight: 500; }
+
+@media (max-width: 620px){
+  .view-details{ grid-template-columns: 1fr; }
+}
