@@ -1,10 +1,25 @@
 const mongoose = require("mongoose");
 
 const feeSchema = new mongoose.Schema({
+    feeId: {
+        type: String
+    },
+
     student: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Student",
-        required: true
+        ref: "Student"
+    },
+
+    studentName: {
+        type: String
+    },
+
+    studentId: {
+        type: String
+    },
+
+    room: {
+        type: String
     },
 
     amount: {
@@ -22,6 +37,8 @@ const feeSchema = new mongoose.Schema({
         enum: ["Paid", "Pending"],
         default: "Pending"
     }
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model("Fee", feeSchema);

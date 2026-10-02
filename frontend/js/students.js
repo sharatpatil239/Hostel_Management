@@ -1,332 +1,571 @@
 /* =========================================================
-   STUDENT MANAGEMENT PAGE — FRONTEND ONLY
-   All data below is placeholder JSON, kept in memory only.
-   No localStorage, no fetch(), no backend calls.
+   STUDENT MANAGEMENT MODULE — PHASE 2
+   Full backend integration: search, multi-field filtering,
+   pagination, validation, editing, rich profiles & deactivation.
    ========================================================= */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Guard page with backend authentication check
+    const user = await api.checkAuth();
+    if (!user) return;
 
-  // TODO: Replace this dummy data with GET /api/students
-  let students = [
-    { id: 'STU-1001', name: 'Ananya Rao', gender: 'Female', phone: '9845012345', email: 'ananya.rao@example.com', dob: '2004-03-12', course: 'B.Tech CSE', year: '2nd Year', address: '14 Lake View Rd, Bengaluru', parentName: 'Suresh Rao', parentPhone: '9845098765', room: '204', status: 'Active' },
-    { id: 'STU-1002', name: 'Vikram Iyer', gender: 'Male', phone: '9900112233', email: 'vikram.iyer@example.com', dob: '2003-11-02', course: 'B.Sc Physics', year: '3rd Year', address: '22 MG Road, Chennai', parentName: 'Ramesh Iyer', parentPhone: '9900198765', room: '118', status: 'Active' },
-    { id: 'STU-1003', name: 'Farhan Sheikh', gender: 'Male', phone: '9811223344', email: 'farhan.sheikh@example.com', dob: '2004-07-19', course: 'B.Com', year: '1st Year', address: '9 Park Street, Hyderabad', parentName: 'Aslam Sheikh', parentPhone: '9811298765', room: '—', status: 'Active' },
-    { id: 'STU-1004', name: 'Priya Nair', gender: 'Female', phone: '9822334455', email: 'priya.nair@example.com', dob: '2002-01-25', course: 'M.Tech ECE', year: '2nd Year', address: '5 Marine Drive, Kochi', parentName: 'Mohan Nair', parentPhone: '9822398765', room: '311', status: 'Active' },
-    { id: 'STU-1005', name: 'Rohan Deshmukh', gender: 'Male', phone: '9833445566', email: 'rohan.d@example.com', dob: '2003-09-08', course: 'B.Tech Mech', year: '3rd Year', address: '18 FC Road, Pune', parentName: 'Anil Deshmukh', parentPhone: '9833498765', room: '204', status: 'Inactive' },
-    { id: 'STU-1006', name: 'Sneha Kulkarni', gender: 'Female', phone: '9844556677', email: 'sneha.k@example.com', dob: '2004-05-30', course: 'B.Sc Physics', year: '1st Year', address: '31 Camp Area, Nagpur', parentName: 'Vijay Kulkarni', parentPhone: '9844598765', room: '311', status: 'Active' },
-    { id: 'STU-1007', name: 'Aditya Verma', gender: 'Male', phone: '9855667788', email: 'aditya.verma@example.com', dob: '2002-12-14', course: 'B.Tech CSE', year: '4th Year', address: '7 Civil Lines, Lucknow', parentName: 'Sanjay Verma', parentPhone: '9855698765', room: '118', status: 'Alumni' },
-    { id: 'STU-1008', name: 'Meera Pillai', gender: 'Female', phone: '9866778899', email: 'meera.pillai@example.com', dob: '2004-02-17', course: 'B.Com', year: '2nd Year', address: '12 Beach Road, Kozhikode', parentName: 'Ravi Pillai', parentPhone: '9866798765', room: '—', status: 'Active' },
-    { id: 'STU-1009', name: 'Karan Malhotra', gender: 'Male', phone: '9877889900', email: 'karan.m@example.com', dob: '2003-06-21', course: 'M.Tech ECE', year: '1st Year', address: '3 Rajouri Garden, Delhi', parentName: 'Deepak Malhotra', parentPhone: '9877898765', room: '204', status: 'Active' },
-    { id: 'STU-1010', name: 'Isha Bhatt', gender: 'Other', phone: '9888990011', email: 'isha.bhatt@example.com', dob: '2004-10-03', course: 'B.Tech Mech', year: '2nd Year', address: '27 Navrangpura, Ahmedabad', parentName: 'Nilesh Bhatt', parentPhone: '9888998765', room: '311', status: 'Active' },
-    { id: 'STU-1011', name: 'Devansh Joshi', gender: 'Male', phone: '9899001122', email: 'devansh.j@example.com', dob: '2003-04-11', course: 'B.Sc Physics', year: '3rd Year', address: '41 Vaishali Nagar, Jaipur', parentName: 'Rakesh Joshi', parentPhone: '9899098765', room: '118', status: 'Active' },
-    { id: 'STU-1012', name: 'Tanya Kapoor', gender: 'Female', phone: '9800112244', email: 'tanya.kapoor@example.com', dob: '2004-08-27', course: 'B.Com', year: '1st Year', address: '16 Sector 21, Chandigarh', parentName: 'Ashok Kapoor', parentPhone: '9800198766', room: '—', status: 'Active' }
-  ];
-
-  let filteredStudents = [...students];
-  let sortState = { key: 'id', dir: 'asc' };
-  let genderFilter = 'all';
-  let editingId = null;
-  let deleteTargetId = null;
-
-  const tbody = document.getElementById('studentTableBody');
-  const emptyState = document.getElementById('studentEmptyState');
-  const studentCount = document.getElementById('studentCount');
-  const searchInput = document.getElementById('studentSearch');
-  const statusFilter = document.getElementById('statusFilter');
-  const courseFilter = document.getElementById('courseFilter');
-
-  // Populate course filter dynamically from data
-  const courses = [...new Set(students.map(s => s.course))].sort();
-  courseFilter.innerHTML = '<option value="all">All Courses</option>' +
-    courses.map(c => `<option value="${c}">${c}</option>`).join('');
-
-  const statusTagClass = { Active: 'tag-teal', Inactive: 'tag-slate', Alumni: 'tag-amber' };
-
-  function initials(name){
-    return name.split(' ').map(p => p[0]).slice(0,2).join('').toUpperCase();
-  }
-
-  function applyFilters(){
-    const q = searchInput.value.trim().toLowerCase();
-    const status = statusFilter.value;
-    const course = courseFilter.value;
-
-    filteredStudents = students.filter(s => {
-      const matchesQuery = !q ||
-        s.name.toLowerCase().includes(q) ||
-        s.id.toLowerCase().includes(q) ||
-        s.room.toLowerCase().includes(q);
-      const matchesStatus = status === 'all' || s.status === status;
-      const matchesCourse = course === 'all' || s.course === course;
-      const matchesGender = genderFilter === 'all' || s.gender === genderFilter;
-      return matchesQuery && matchesStatus && matchesCourse && matchesGender;
-    });
-
-    applySort();
-    render();
-  }
-
-  function applySort(){
-    const { key, dir } = sortState;
-    filteredStudents.sort((a, b) => {
-      let av = a[key === 'room' ? 'room' : key];
-      let bv = b[key === 'room' ? 'room' : key];
-      if (typeof av === 'string') av = av.toLowerCase();
-      if (typeof bv === 'string') bv = bv.toLowerCase();
-      if (av < bv) return dir === 'asc' ? -1 : 1;
-      if (av > bv) return dir === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }
-
-  function render(){
-    studentCount.textContent = `${filteredStudents.length} student${filteredStudents.length !== 1 ? 's' : ''}`;
-
-    if (filteredStudents.length === 0){
-      tbody.innerHTML = '';
-      emptyState.style.display = 'block';
-      return;
+    // 2. Wire up Logout
+    const logoutBtn = document.getElementById('logoutLink');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            api.logout();
+        });
     }
-    emptyState.style.display = 'none';
 
-    tbody.innerHTML = filteredStudents.map(s => `
-      <tr>
-        <td class="cell-id">${s.id}</td>
-        <td>
-          <div class="name-cell">
-            <span class="avatar-chip">${initials(s.name)}</span>
-            <span class="cell-primary">${s.name}</span>
-          </div>
-        </td>
-        <td>${s.gender}</td>
-        <td>${s.phone}</td>
-        <td class="cell-sub">${s.email}</td>
-        <td>${s.course}</td>
-        <td>${s.year}</td>
-        <td>${s.room}</td>
-        <td><span class="key-tag ${statusTagClass[s.status] || 'tag-slate'}">${s.status}</span></td>
-        <td>
-          <div class="row-actions">
-            <button class="btn btn-ghost btn-icon" title="View" data-action="view" data-id="${s.id}">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-            <button class="btn btn-ghost btn-icon" title="Edit" data-action="edit" data-id="${s.id}">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
-            </button>
-            <button class="btn btn-ghost btn-icon" title="Delete" data-action="delete" data-id="${s.id}">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            </button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
-  }
+    // State
+    let students = [];
+    let currentPage = 1;
+    let limit = 10;
+    let totalRecords = 0;
+    let totalPages = 1;
+    let sortField = 'createdAt';
+    let sortOrder = 'desc';
+    let genderFilter = 'all';
+    let editingId = null;
+    let targetStudentId = null;
 
-  // ---- Search / filters ----
-  searchInput.addEventListener('input', applyFilters);
-  statusFilter.addEventListener('change', applyFilters);
-  courseFilter.addEventListener('change', applyFilters);
+    // UI references
+    const tbody = document.getElementById('studentTableBody');
+    const emptyState = document.getElementById('studentEmptyState');
+    const studentCount = document.getElementById('studentCount');
+    const studentPager = document.getElementById('studentPager');
+    const searchInput = document.getElementById('studentSearch');
+    const statusFilter = document.getElementById('statusFilter');
+    const departmentFilter = document.getElementById('departmentFilter');
+    const courseFilter = document.getElementById('courseFilter');
+    const yearFilter = document.getElementById('yearFilter');
 
-  document.querySelectorAll('.filter-pill[data-gender]').forEach(pill => {
-    pill.addEventListener('click', () => {
-      document.querySelectorAll('.filter-pill[data-gender]').forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      genderFilter = pill.dataset.gender;
-      applyFilters();
-    });
-  });
-
-  // ---- Sorting ----
-  document.querySelectorAll('#studentTable thead th[data-sort]').forEach(th => {
-    th.addEventListener('click', () => {
-      const key = th.dataset.sort;
-      if (sortState.key === key){
-        sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
-      } else {
-        sortState = { key, dir: 'asc' };
-      }
-      applySort();
-      render();
-    });
-  });
-
-  // ---- Modal helpers ----
-  function openModal(id){ document.getElementById(id).classList.add('open'); }
-  function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-
-  document.querySelectorAll('[data-close-modal]').forEach(btn => {
-    btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
-  });
-  document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
-  });
-
-  // ---- Add / Edit form ----
-  const studentForm = document.getElementById('studentForm');
-  const studentModalTitle = document.getElementById('studentModalTitle');
-
-  const formFields = {
-    studentId: document.getElementById('f_studentId'),
-    name: document.getElementById('f_name'),
-    gender: document.getElementById('f_gender'),
-    dob: document.getElementById('f_dob'),
-    phone: document.getElementById('f_phone'),
-    email: document.getElementById('f_email'),
-    course: document.getElementById('f_course'),
-    year: document.getElementById('f_year'),
-    address: document.getElementById('f_address'),
-    parentName: document.getElementById('f_parentName'),
-    parentPhone: document.getElementById('f_parentPhone')
-  };
-
-  function resetForm(){
-    studentForm.reset();
-    Object.values(formFields).forEach(f => f.closest('.form-field')?.classList.remove('invalid'));
-    editingId = null;
-  }
-
-  document.getElementById('addStudentBtn').addEventListener('click', () => {
-    resetForm();
-    studentModalTitle.textContent = 'Add Student';
-    openModal('studentModalOverlay');
-  });
-
-  function populateForm(s){
-    formFields.studentId.value = s.id;
-    formFields.name.value = s.name;
-    formFields.gender.value = s.gender;
-    formFields.dob.value = s.dob;
-    formFields.phone.value = s.phone;
-    formFields.email.value = s.email;
-    formFields.course.value = s.course;
-    formFields.year.value = s.year;
-    formFields.address.value = s.address;
-    formFields.parentName.value = s.parentName;
-    formFields.parentPhone.value = s.parentPhone;
-  }
-
-  function validateStudentForm(){
-    let valid = true;
-    function check(field, condition){
-      const wrap = field.closest('.form-field');
-      wrap.classList.toggle('invalid', !condition);
-      if (!condition) valid = false;
-    }
-    check(formFields.studentId, formFields.studentId.value.trim().length > 0);
-    check(formFields.name, formFields.name.value.trim().length > 0);
-    check(formFields.gender, formFields.gender.value !== '');
-    check(formFields.phone, /^\d{10}$/.test(formFields.phone.value.trim()));
-    check(formFields.email, /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formFields.email.value.trim()));
-    check(formFields.course, formFields.course.value.trim().length > 0);
-    check(formFields.year, formFields.year.value !== '');
-    return valid;
-  }
-
-  studentForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (!validateStudentForm()) return;
-
-    const data = {
-      id: formFields.studentId.value.trim(),
-      name: formFields.name.value.trim(),
-      gender: formFields.gender.value,
-      dob: formFields.dob.value,
-      phone: formFields.phone.value.trim(),
-      email: formFields.email.value.trim(),
-      course: formFields.course.value.trim(),
-      year: formFields.year.value,
-      address: formFields.address.value.trim(),
-      parentName: formFields.parentName.value.trim(),
-      parentPhone: formFields.parentPhone.value.trim()
+    const statusTagClass = {
+        Active: 'tag-teal',
+        Inactive: 'tag-slate',
+        'Checked Out': 'tag-amber',
+        Alumni: 'tag-amber'
     };
 
-    if (editingId){
-      // TODO: Replace with PUT /api/students/:id
-      const idx = students.findIndex(s => s.id === editingId);
-      students[idx] = { ...students[idx], ...data };
-      showToast('Student updated successfully.', 'success');
-    } else {
-      // TODO: Replace with POST /api/students
-      students.push({ ...data, room: '—', status: 'Active' });
-      showToast('Student added successfully.', 'success');
-      const updatedCourses = [...new Set(students.map(s => s.course))].sort();
-      courseFilter.innerHTML = '<option value="all">All Courses</option>' +
-        updatedCourses.map(c => `<option value="${c}">${c}</option>`).join('');
+    function initials(name) {
+        if (!name) return '--';
+        return name.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
     }
 
-    closeModal('studentModalOverlay');
-    applyFilters();
-  });
-
-  // ---- View modal ----
-  function openView(s){
-    document.getElementById('viewAvatar').textContent = initials(s.name);
-    document.getElementById('viewName').textContent = s.name;
-    document.getElementById('viewId').textContent = s.id;
-    const rows = [
-      ['Gender', s.gender], ['Date of Birth', s.dob || '—'],
-      ['Phone', s.phone], ['Email', s.email],
-      ['Course', s.course], ['Year', s.year],
-      ['Assigned Room', s.room], ['Status', s.status],
-      ['Parent Name', s.parentName || '—'], ['Parent Phone', s.parentPhone || '—'],
-      ['Address', s.address || '—']
-    ];
-    document.getElementById('viewDetails').innerHTML = rows.map(([label, value]) => `
-      <div class="vd-item"><div class="vd-label">${label}</div><div class="vd-value">${value}</div></div>
-    `).join('');
-    openModal('viewModalOverlay');
-  }
-
-  // ---- Table action delegation ----
-  tbody.addEventListener('click', (e) => {
-    const btn = e.target.closest('button[data-action]');
-    if (!btn) return;
-    const id = btn.dataset.id;
-    const student = students.find(s => s.id === id);
-    if (!student) return;
-
-    if (btn.dataset.action === 'view'){
-      openView(student);
-    } else if (btn.dataset.action === 'edit'){
-      resetForm();
-      editingId = id;
-      studentModalTitle.textContent = 'Edit Student';
-      populateForm(student);
-      openModal('studentModalOverlay');
-    } else if (btn.dataset.action === 'delete'){
-      deleteTargetId = id;
-      document.getElementById('confirmText').textContent =
-        `This will permanently remove ${student.name} (${student.id}) from student records. This action cannot be undone.`;
-      openModal('confirmModalOverlay');
+    function formatDate(dateVal) {
+        if (!dateVal) return '—';
+        const d = new Date(dateVal);
+        if (isNaN(d.getTime())) return String(dateVal);
+        return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
     }
-  });
 
-  document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
-    if (!deleteTargetId) return;
-    // TODO: Replace with DELETE /api/students/:id
-    students = students.filter(s => s.id !== deleteTargetId);
-    deleteTargetId = null;
-    closeModal('confirmModalOverlay');
-    applyFilters();
-    showToast('Student deleted.', 'success');
-  });
+    function toInputDateFormat(dateVal) {
+        if (!dateVal) return '';
+        const d = new Date(dateVal);
+        if (isNaN(d.getTime())) return '';
+        return d.toISOString().split('T')[0];
+    }
 
-  // ---- Toasts ----
-  function showToast(message, type = ''){
-    const stack = document.getElementById('toastStack');
-    const toast = document.createElement('div');
-    toast.className = `toast ${type ? 'toast-' + type : ''}`;
-    toast.textContent = message;
-    stack.appendChild(toast);
-    setTimeout(() => toast.remove(), 3200);
-  }
+    // Dynamic Filter Dropdowns Setup
+    let departmentsPopulated = false;
+    function updateFilterDropdowns(studentList) {
+        if (departmentsPopulated) return;
 
-  // ---- Sidebar toggle ----
-  const sidebar = document.getElementById('sidebar');
-  const sidebarToggle = document.getElementById('sidebarToggle');
-  sidebarToggle && sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+        const depts = [...new Set(studentList.map(s => s.department).filter(Boolean))].sort();
+        if (depts.length > 0) {
+            departmentFilter.innerHTML = '<option value="all">All Departments</option>' +
+                depts.map(d => `<option value="${d}">${d}</option>`).join('');
+        }
 
-  // Initial render
-  applySort();
-  render();
+        const courses = [...new Set(studentList.map(s => s.course).filter(Boolean))].sort();
+        if (courses.length > 0) {
+            courseFilter.innerHTML = '<option value="all">All Courses</option>' +
+                courses.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        departmentsPopulated = true;
+    }
+
+    // Core Data Fetcher from Backend API
+    async function loadStudents() {
+        try {
+            const params = new URLSearchParams();
+            params.set('page', currentPage);
+            params.set('limit', limit);
+            params.set('sort', sortField);
+            params.set('order', sortOrder);
+
+            const q = searchInput.value.trim();
+            if (q) params.set('search', q);
+
+            if (statusFilter.value !== 'all') params.set('status', statusFilter.value);
+            if (departmentFilter.value !== 'all') params.set('department', departmentFilter.value);
+            if (courseFilter.value !== 'all') params.set('course', courseFilter.value);
+            if (yearFilter.value !== 'all') params.set('year', yearFilter.value);
+            if (genderFilter !== 'all') params.set('gender', genderFilter);
+
+            const response = await api.get(`/api/students?${params.toString()}`);
+            students = response.data || [];
+
+            if (response.pagination) {
+                currentPage = response.pagination.page;
+                totalPages = response.pagination.pages;
+                totalRecords = response.pagination.total;
+            } else {
+                totalRecords = students.length;
+                totalPages = Math.ceil(totalRecords / limit) || 1;
+            }
+
+            renderTable();
+            renderPager();
+            updateFilterDropdowns(students);
+        } catch (error) {
+            showToast(error.message || 'Failed to load students', 'error');
+        }
+    }
+
+    // Render Table Rows
+    function renderTable() {
+        studentCount.textContent = `${totalRecords} student${totalRecords !== 1 ? 's' : ''}`;
+
+        if (!students || students.length === 0) {
+            tbody.innerHTML = '';
+            emptyState.style.display = 'block';
+            return;
+        }
+        emptyState.style.display = 'none';
+
+        tbody.innerHTML = students.map(s => {
+            const idVal = s.studentId || s.id || '—';
+            const roomVal = s.room || '—';
+            const deptVal = s.department || s.course || '—';
+            const courseVal = s.course ? `${s.course} (${s.department || 'Gen'})` : deptVal;
+
+            return `
+                <tr>
+                    <td class="cell-id"><b>${idVal}</b></td>
+                    <td>
+                        <div class="name-cell">
+                            <span class="avatar-chip">${initials(s.name)}</span>
+                            <div>
+                                <span class="cell-primary">${s.name}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${s.gender || '—'}</td>
+                    <td>${s.phone || '—'}</td>
+                    <td class="cell-sub">${s.email || '—'}</td>
+                    <td>
+                        <span class="cell-primary" style="font-size:12.5px;">${s.course || '—'}</span>
+                        <div class="cell-sub" style="font-size:11px;">${s.department || ''}</div>
+                    </td>
+                    <td>${s.year || '—'}</td>
+                    <td><b>${roomVal}</b></td>
+                    <td>
+                        <span class="key-tag ${statusTagClass[s.status] || 'tag-slate'}">
+                            ${s.status || 'Active'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="btn btn-ghost btn-icon" title="View Profile" data-action="view" data-id="${s._id || s.studentId}">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                            <button class="btn btn-ghost btn-icon" title="Edit Student" data-action="edit" data-id="${s._id || s.studentId}">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                            </button>
+                            <button class="btn btn-ghost btn-icon" title="Exit / Deactivate" data-action="delete" data-id="${s._id || s.studentId}">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 22H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h5"/><polyline points="17 16 21 12 17 8"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // Render Pagination Controls
+    function renderPager() {
+        if (!studentPager) return;
+
+        if (totalPages <= 1) {
+            studentPager.innerHTML = `<span style="font-size:12px; color:var(--slate);">Page 1 of 1</span>`;
+            return;
+        }
+
+        let html = '';
+        html += `<button class="pager-btn" ${currentPage === 1 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} data-page="${currentPage - 1}" aria-label="Previous page">&lsaquo;</button>`;
+
+        for (let p = 1; p <= totalPages; p++) {
+            if (p === 1 || p === totalPages || (p >= currentPage - 1 && p <= currentPage + 1)) {
+                html += `<button class="pager-btn ${p === currentPage ? 'active' : ''}" data-page="${p}">${p}</button>`;
+            } else if (p === currentPage - 2 || p === currentPage + 2) {
+                html += `<span style="padding:0 4px; color:var(--slate);">&hellip;</span>`;
+            }
+        }
+
+        html += `<button class="pager-btn" ${currentPage === totalPages ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''} data-page="${currentPage + 1}" aria-label="Next page">&rsaquo;</button>`;
+        studentPager.innerHTML = html;
+    }
+
+    // Pager Click Delegation
+    studentPager.addEventListener('click', (e) => {
+        const btn = e.target.closest('.pager-btn');
+        if (!btn || btn.disabled) return;
+        const page = parseInt(btn.dataset.page, 10);
+        if (page && page !== currentPage) {
+            currentPage = page;
+            loadStudents();
+        }
+    });
+
+    // Debounced Search Handler
+    let searchDebounceTimer;
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(() => {
+            currentPage = 1;
+            loadStudents();
+        }, 300);
+    });
+
+    // Filter Change Handlers
+    [statusFilter, departmentFilter, courseFilter, yearFilter].forEach(el => {
+        el.addEventListener('change', () => {
+            currentPage = 1;
+            loadStudents();
+        });
+    });
+
+    // Gender Filter Pills
+    document.querySelectorAll('.filter-pill[data-gender]').forEach(pill => {
+        pill.addEventListener('click', () => {
+            document.querySelectorAll('.filter-pill[data-gender]').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            genderFilter = pill.dataset.gender;
+            currentPage = 1;
+            loadStudents();
+        });
+    });
+
+    // Table Header Sorting
+    document.querySelectorAll('#studentTable thead th[data-sort]').forEach(th => {
+        th.addEventListener('click', () => {
+            const key = th.dataset.sort;
+            if (sortField === key) {
+                sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortField = key;
+                sortOrder = 'asc';
+            }
+            loadStudents();
+        });
+    });
+
+    // Modal Helpers
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    document.querySelectorAll('[data-close-modal]').forEach(btn => {
+        btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+    });
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
+    });
+
+    // Form Elements
+    const studentForm = document.getElementById('studentForm');
+    const studentModalTitle = document.getElementById('studentModalTitle');
+    const studentFormError = document.getElementById('studentFormError');
+    const studentFormErrorText = document.getElementById('studentFormErrorText');
+    const saveStudentBtn = document.getElementById('saveStudentBtn');
+
+    const formFields = {
+        studentId: document.getElementById('f_studentId'),
+        name: document.getElementById('f_name'),
+        gender: document.getElementById('f_gender'),
+        dob: document.getElementById('f_dob'),
+        email: document.getElementById('f_email'),
+        phone: document.getElementById('f_phone'),
+        address: document.getElementById('f_address'),
+        course: document.getElementById('f_course'),
+        department: document.getElementById('f_department'),
+        year: document.getElementById('f_year'),
+        guardianName: document.getElementById('f_guardianName'),
+        guardianRelationship: document.getElementById('f_guardianRelationship'),
+        guardianPhone: document.getElementById('f_guardianPhone'),
+        admissionDate: document.getElementById('f_admissionDate'),
+        status: document.getElementById('f_status')
+    };
+
+    function clearFormErrors() {
+        studentFormError.style.display = 'none';
+        Object.values(formFields).forEach(f => f.closest('.form-field')?.classList.remove('invalid'));
+    }
+
+    function showFormError(msg) {
+        studentFormErrorText.textContent = msg;
+        studentFormError.style.display = 'block';
+    }
+
+    function resetForm() {
+        studentForm.reset();
+        clearFormErrors();
+        formFields.studentId.disabled = false;
+        formFields.year.value = '1st Year';
+        formFields.guardianRelationship.value = 'Father';
+        formFields.status.value = 'Active';
+        formFields.admissionDate.value = new Date().toISOString().split('T')[0];
+        editingId = null;
+    }
+
+    document.getElementById('addStudentBtn').addEventListener('click', () => {
+        resetForm();
+        studentModalTitle.textContent = 'Add New Student';
+        saveStudentBtn.textContent = 'Save Student';
+        openModal('studentModalOverlay');
+    });
+
+    function populateForm(s) {
+        formFields.studentId.value = s.studentId || '';
+        formFields.studentId.disabled = true; // Key field preserved during edit
+        formFields.name.value = s.name || '';
+        formFields.gender.value = s.gender || '';
+        formFields.dob.value = toInputDateFormat(s.dateOfBirth || s.dob);
+        formFields.email.value = s.email || '';
+        formFields.phone.value = s.phone || '';
+        formFields.address.value = s.address || '';
+        formFields.course.value = s.course || '';
+        formFields.department.value = s.department || '';
+        formFields.year.value = s.year || '1st Year';
+
+        const g = s.guardian || {};
+        formFields.guardianName.value = g.name || s.parentName || '';
+        formFields.guardianRelationship.value = g.relationship || 'Guardian';
+        formFields.guardianPhone.value = g.phone || s.parentPhone || '';
+
+        formFields.admissionDate.value = toInputDateFormat(s.admissionDate);
+        formFields.status.value = s.status || 'Active';
+    }
+
+    function validateFormClientSide() {
+        clearFormErrors();
+        let valid = true;
+
+        function markInvalid(field) {
+            field.closest('.form-field')?.classList.add('invalid');
+            valid = false;
+        }
+
+        if (!formFields.studentId.value.trim()) markInvalid(formFields.studentId);
+        if (!formFields.name.value.trim()) markInvalid(formFields.name);
+        if (!formFields.gender.value) markInvalid(formFields.gender);
+
+        const emailVal = formFields.email.value.trim();
+        if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+            markInvalid(formFields.email);
+        }
+
+        const phoneVal = formFields.phone.value.trim();
+        if (!phoneVal || !/^\+?[0-9\s\-()]{7,15}$/.test(phoneVal)) {
+            markInvalid(formFields.phone);
+        }
+
+        if (!valid) {
+            showFormError('Please fill in all required fields accurately.');
+        }
+
+        return valid;
+    }
+
+    studentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!validateFormClientSide()) return;
+
+        const payload = {
+            studentId: formFields.studentId.value.trim().toUpperCase(),
+            name: formFields.name.value.trim(),
+            gender: formFields.gender.value,
+            dateOfBirth: formFields.dob.value || undefined,
+            email: formFields.email.value.trim().toLowerCase(),
+            phone: formFields.phone.value.trim(),
+            address: formFields.address.value.trim(),
+            course: formFields.course.value.trim(),
+            department: formFields.department.value.trim(),
+            year: formFields.year.value,
+            guardian: {
+                name: formFields.guardianName.value.trim(),
+                relationship: formFields.guardianRelationship.value,
+                phone: formFields.guardianPhone.value.trim()
+            },
+            admissionDate: formFields.admissionDate.value || undefined,
+            status: formFields.status.value
+        };
+
+        saveStudentBtn.disabled = true;
+        saveStudentBtn.textContent = 'Saving...';
+
+        try {
+            if (editingId) {
+                await api.put(`/api/students/${editingId}`, payload);
+                showToast('Student profile updated successfully.', 'success');
+            } else {
+                await api.post('/api/students', payload);
+                showToast('Student registered successfully.', 'success');
+            }
+            closeModal('studentModalOverlay');
+            await loadStudents();
+        } catch (error) {
+            showFormError(error.message || 'Failed to save student record.');
+        } finally {
+            saveStudentBtn.disabled = false;
+            saveStudentBtn.textContent = editingId ? 'Update Student' : 'Save Student';
+        }
+    });
+
+    // View Profile Modal
+    async function openProfile(identifier) {
+        try {
+            const res = await api.get(`/api/students/${identifier}`);
+            const s = res.data;
+            if (!s) throw new Error('Student not found');
+
+            document.getElementById('viewAvatar').textContent = initials(s.name);
+            document.getElementById('viewName').textContent = s.name;
+            document.getElementById('viewId').textContent = s.studentId || s.id;
+
+            const g = s.guardian || {};
+
+            const sections = [
+                // 1. Personal Information
+                { title: 'Personal Information', items: [
+                    ['Student ID', s.studentId || '—'],
+                    ['Full Name', s.name || '—'],
+                    ['Gender', s.gender || '—'],
+                    ['Date of Birth', formatDate(s.dateOfBirth || s.dob)]
+                ]},
+                // 2. Contact Information
+                { title: 'Contact Information', items: [
+                    ['Email', s.email || '—'],
+                    ['Phone', s.phone || '—'],
+                    ['Permanent Address', s.address || '—']
+                ]},
+                // 3. Academic Information
+                { title: 'Academic Information', items: [
+                    ['Course', s.course || '—'],
+                    ['Department', s.department || 'General'],
+                    ['Year of Study', s.year || '—']
+                ]},
+                // 4. Guardian Information
+                { title: 'Guardian Information', items: [
+                    ['Guardian Name', g.name || s.parentName || '—'],
+                    ['Relationship', g.relationship || 'Guardian'],
+                    ['Guardian Phone', g.phone || s.parentPhone || '—']
+                ]},
+                // 5. Hostel Information
+                { title: 'Hostel Information', items: [
+                    ['Admission Date', formatDate(s.admissionDate)],
+                    ['Hostel Status', `<span class="key-tag ${statusTagClass[s.status] || 'tag-slate'}">${s.status || 'Active'}</span>`],
+                    ['Allocated Room', s.room && s.room !== '—' ? `Room ${s.room}` : 'Not Allocated']
+                ]}
+            ];
+
+            const container = document.getElementById('viewDetails');
+            container.innerHTML = sections.map(sec => `
+                <div class="view-section-title">${sec.title}</div>
+                ${sec.items.map(([label, val]) => `
+                    <div class="vd-item">
+                        <div class="vd-label">${label}</div>
+                        <div class="vd-value">${val}</div>
+                    </div>
+                `).join('')}
+            `).join('');
+
+            openModal('viewModalOverlay');
+        } catch (err) {
+            showToast(err.message || 'Failed to load student profile', 'error');
+        }
+    }
+
+    // Action Buttons Delegation
+    tbody.addEventListener('click', async (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const id = btn.dataset.id;
+        if (!id) return;
+
+        if (btn.dataset.action === 'view') {
+            await openProfile(id);
+        } else if (btn.dataset.action === 'edit') {
+            try {
+                const res = await api.get(`/api/students/${id}`);
+                const student = res.data;
+                resetForm();
+                editingId = student._id || student.studentId;
+                studentModalTitle.textContent = 'Edit Student Details';
+                saveStudentBtn.textContent = 'Update Student';
+                populateForm(student);
+                openModal('studentModalOverlay');
+            } catch (err) {
+                showToast(err.message || 'Failed to fetch student data for editing', 'error');
+            }
+        } else if (btn.dataset.action === 'delete') {
+            targetStudentId = id;
+            const student = students.find(s => (s._id === id || s.studentId === id));
+            const name = student ? student.name : id;
+            document.getElementById('confirmText').textContent =
+                `Managing exit for resident: ${name}. Safe deactivation preserves fee history.`;
+            openModal('confirmModalOverlay');
+        }
+    });
+
+    // Exit / Delete Action Handler
+    const confirmActionBtn = document.getElementById('confirmActionBtn');
+    confirmActionBtn.addEventListener('click', async () => {
+        if (!targetStudentId) return;
+
+        const exitType = document.querySelector('input[name="exitType"]:checked')?.value || 'checkout';
+        confirmActionBtn.disabled = true;
+        confirmActionBtn.textContent = 'Processing...';
+
+        try {
+            if (exitType === 'permanent') {
+                await api.delete(`/api/students/${targetStudentId}?permanent=true`);
+                showToast('Student permanently removed from system.', 'success');
+            } else {
+                await api.delete(`/api/students/${targetStudentId}`);
+                showToast('Student checked out and safely deactivated.', 'success');
+            }
+            closeModal('confirmModalOverlay');
+            targetStudentId = null;
+            await loadStudents();
+        } catch (err) {
+            showToast(err.message || 'Action failed', 'error');
+        } finally {
+            confirmActionBtn.disabled = false;
+            confirmActionBtn.textContent = 'Confirm Action';
+        }
+    });
+
+    // Toast Notification Utility
+    function showToast(message, type = '') {
+        const stack = document.getElementById('toastStack');
+        if (!stack) return;
+        const toast = document.createElement('div');
+        toast.className = `toast ${type ? 'toast-' + type : ''}`;
+        toast.textContent = message;
+        stack.appendChild(toast);
+        setTimeout(() => toast.remove(), 3200);
+    }
+
+    // Sidebar Toggle (Mobile view)
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    }
+
+    // Initial load from backend
+    await loadStudents();
 });

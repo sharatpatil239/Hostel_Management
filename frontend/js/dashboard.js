@@ -1,85 +1,97 @@
 /* =========================================================
-   DASHBOARD PAGE — FRONTEND ONLY
-   All data below is placeholder JSON. Replace with real data
-   fetched from backend APIs once available.
+   DASHBOARD PAGE — AUTHENTICATED REAL DATA
+   Protected by JWT auth via api.checkAuth(), fetches live stats.
    ========================================================= */
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Guard page with backend authentication check
+    const user = await api.checkAuth();
+    if (!user) return; // checkAuth handles redirection to login.html
 
-  // TODO: Replace this dummy data with GET /api/dashboard/summary
-  const dashboardSummary = [
-    { label: 'Total Students', value: 186, foot: '+6 this month', tint: 'var(--brass-tint)' },
-    { label: 'Total Rooms', value: 64, foot: 'Across 4 floors', tint: 'var(--teal-tint)' },
-    { label: 'Occupied Rooms', value: 51, foot: '79.7% occupancy', tint: 'var(--amber-tint)' },
-    { label: 'Available Rooms', value: 13, foot: 'Ready for allocation', tint: 'var(--teal-tint)' },
-    { label: 'Pending Fees', value: '₹4.82L', foot: '38 students pending', tint: 'var(--rust-tint)' }
-  ];
+    // 2. Wire up Logout
+    const logoutBtn = document.getElementById('logoutLink');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            api.logout();
+        });
+    }
 
-  // TODO: Replace this dummy data with GET /api/dashboard/occupancy
-  const floorOccupancy = [
-    { floor: 'Ground Floor', occupied: 14, total: 16 },
-    { floor: '1st Floor', occupied: 15, total: 18 },
-    { floor: '2nd Floor', occupied: 12, total: 16 },
-    { floor: '3rd Floor', occupied: 10, total: 14 }
-  ];
+    // 3. UI references
+    const statGrid = document.getElementById('statGrid');
+    const occupancyWrap = document.getElementById('occupancyWrap');
+    const activityList = document.getElementById('activityList');
 
-  // TODO: Replace this dummy data with GET /api/dashboard/activity
-  const recentActivity = [
-    { type: 'brass', text: '<b>Ananya Rao</b> was allocated to Room 204', time: '10 minutes ago' },
-    { type: 'teal', text: '<b>Vikram Iyer</b> paid pending hostel fees', time: '42 minutes ago' },
-    { type: 'rust', text: '<b>Room 118</b> fee payment marked overdue', time: '1 hour ago' },
-    { type: 'brass', text: 'New student <b>Farhan Sheikh</b> registered', time: '3 hours ago' },
-    { type: 'teal', text: '<b>Room 305</b> status updated to Available', time: 'Yesterday' }
-  ];
+    // Default static activity items (or can be dynamic from recent DB events)
+    const recentActivity = [
+        { type: 'brass', text: '<b>System</b> synchronized hostel database', time: 'Just now' },
+        { type: 'teal', text: '<b>Admin session</b> authenticated securely via JWT', time: 'Live' },
+        { type: 'brass', text: 'Resident records and room allocations loaded', time: 'Today' }
+    ];
 
-  // ---- Render stat cards ----
-  const statGrid = document.getElementById('statGrid');
-  statGrid.innerHTML = dashboardSummary.map(s => `
-    <div class="stat-card" style="--tint:${s.tint}">
-      <div class="stat-label">${s.label}</div>
-      <div class="stat-value">${s.value}</div>
-      <div class="stat-foot">${s.foot}</div>
-    </div>
-  `).join('');
+    const iconMap = {
+        brass: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>',
+        teal: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+        rust: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
+    };
 
-  // ---- Render occupancy bars ----
-  const occupancyWrap = document.getElementById('occupancyWrap');
-  occupancyWrap.innerHTML = floorOccupancy.map(f => {
-    const pct = Math.round((f.occupied / f.total) * 100);
-    const level = pct >= 85 ? 'high' : pct <= 60 ? 'low' : '';
-    return `
-      <div class="occ-row">
-        <div class="occ-label">${f.floor}</div>
-        <div class="occ-track"><div class="occ-fill ${level}" style="width:${pct}%"></div></div>
-        <div class="occ-value">${f.occupied}/${f.total}</div>
-      </div>
-    `;
-  }).join('');
+    function renderActivity(items) {
+        if (!activityList) return;
+        activityList.innerHTML = items.map(a => `
+            <div class="activity-item">
+                <div class="activity-dot ${a.type}">${iconMap[a.type] || iconMap.brass}</div>
+                <div>
+                    <div class="activity-text">${a.text}</div>
+                    <div class="activity-time">${a.time}</div>
+                </div>
+            </div>
+        `).join('');
+    }
 
-  // ---- Render recent activity ----
-  const activityList = document.getElementById('activityList');
-  const iconMap = {
-    brass: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>',
-    teal: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
-    rust: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>'
-  };
-  activityList.innerHTML = recentActivity.map(a => `
-    <div class="activity-item">
-      <div class="activity-dot ${a.type}">${iconMap[a.type]}</div>
-      <div>
-        <div class="activity-text">${a.text}</div>
-        <div class="activity-time">${a.time}</div>
-      </div>
-    </div>
-  `).join('');
+    function renderSummary(summaryData) {
+        if (!statGrid) return;
+        statGrid.innerHTML = summaryData.map(s => `
+            <div class="stat-card" style="--tint:${s.tint}">
+                <div class="stat-label">${s.label}</div>
+                <div class="stat-value">${s.value}</div>
+                <div class="stat-foot">${s.foot}</div>
+            </div>
+        `).join('');
+    }
 
-  // ---- Sidebar toggle (mobile) ----
-  const sidebar = document.getElementById('sidebar');
-  const sidebarToggle = document.getElementById('sidebarToggle');
-  sidebarToggle && sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    function renderOccupancy(floors) {
+        if (!occupancyWrap) return;
+        occupancyWrap.innerHTML = floors.map(f => {
+            const pct = f.total > 0 ? Math.round((f.occupied / f.total) * 100) : 0;
+            const level = pct >= 85 ? 'high' : pct <= 60 ? 'low' : '';
+            return `
+                <div class="occ-row">
+                    <div class="occ-label">${f.floor}</div>
+                    <div class="occ-track"><div class="occ-fill ${level}" style="width:${pct}%"></div></div>
+                    <div class="occ-value">${f.occupied}/${f.total}</div>
+                </div>
+            `;
+        }).join('');
+    }
 
-  // ---- Logout ----
-  document.getElementById('logoutLink').addEventListener('click', () => {
-    // TODO: Replace with real session/token invalidation call when backend exists.
-  });
+    // 4. Fetch live dashboard data from backend
+    try {
+        const response = await api.get('/api/dashboard');
+        const dash = response.data;
+
+        if (dash) {
+            if (dash.summary) renderSummary(dash.summary);
+            if (dash.floorOccupancy) renderOccupancy(dash.floorOccupancy);
+        }
+        renderActivity(recentActivity);
+    } catch (err) {
+        console.error('Failed to load dashboard data from backend:', err);
+    }
+
+    // 5. Sidebar toggle (mobile view)
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    }
 });

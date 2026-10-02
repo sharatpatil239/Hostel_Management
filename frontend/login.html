@@ -49,9 +49,9 @@
 
       <form class="login-form" id="loginForm" novalidate>
         <div class="form-field" id="usernameField">
-          <label for="username">Username <span class="req">*</span></label>
-          <input type="text" id="username" name="username" placeholder="admin" autocomplete="username">
-          <span class="field-error">Please enter your username.</span>
+          <label for="username">Email or Username <span class="req">*</span></label>
+          <input type="text" id="username" name="username" placeholder="admin@hostel.com" autocomplete="username">
+          <span class="field-error">Please enter your email or username.</span>
         </div>
 
         <div class="form-field" id="passwordField">
@@ -73,15 +73,15 @@
           <a href="#" class="forgot-link" id="forgotLink">Forgot password?</a>
         </div>
 
-        <button type="submit" class="btn btn-brass btn-login">Login</button>
+        <button type="submit" class="btn btn-brass btn-login" id="loginSubmitBtn">Login</button>
       </form>
 
-      <div class="login-hint">DEMO CREDENTIALS &middot; admin / admin123</div>
     </div>
   </section>
 
 </div>
 
+<script src="js/api.js"></script>
 <script src="js/login.js"></script>
 </body>
 </html>

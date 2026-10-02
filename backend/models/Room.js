@@ -7,6 +7,16 @@ const roomSchema = new mongoose.Schema({
         unique: true
     },
 
+    floor: {
+        type: String,
+        default: "Ground Floor"
+    },
+
+    type: {
+        type: String,
+        default: "Double Sharing"
+    },
+
     capacity: {
         type: Number,
         required: true
@@ -19,9 +29,11 @@ const roomSchema = new mongoose.Schema({
 
     status: {
         type: String,
-        enum: ["Available", "Full"],
+        enum: ["Available", "Partially Occupied", "Full", "Under Maintenance"],
         default: "Available"
     }
+}, {
+    timestamps: true
 });
 
 module.exports = mongoose.model("Room", roomSchema);

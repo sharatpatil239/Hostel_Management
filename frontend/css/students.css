@@ -1,11 +1,11 @@
 /* =========================================================
-   STUDENT MANAGEMENT PAGE
+   STUDENT MANAGEMENT PAGE STYLES
    ========================================================= */
 
-.filter-pills{
+.filter-pills {
   display: flex; gap: 8px; flex-wrap: wrap;
 }
-.filter-pill{
+.filter-pill {
   border: 1px solid var(--line);
   background: var(--surface);
   padding: 7px 13px;
@@ -14,33 +14,106 @@
   font-weight: 600;
   color: var(--slate);
   cursor: pointer;
+  transition: all 0.15s ease;
 }
-.filter-pill.active{
+.filter-pill:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.filter-pill.active {
   background: var(--ink); color: #fff; border-color: var(--ink);
 }
 
-.view-modal .view-head{
-  display: flex; align-items: center; gap: 14px;
+/* Modal Form Section Styling */
+.form-section-head {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--brass-deep);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 6px;
+  margin-top: 10px;
 }
-.view-avatar{
+.form-section-head:first-of-type {
+  margin-top: 0;
+}
+
+/* View Modal Styling */
+.view-modal .view-head {
+  display: flex; align-items: center; gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.view-avatar {
   width: 56px; height: 56px; border-radius: 14px;
   background: linear-gradient(155deg, var(--brass) 0%, var(--brass-deep) 100%);
   color: #26190A; display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display); font-weight: 700; font-size: 20px; flex-shrink: 0;
 }
-.view-name{ font-size: 17px; font-family: var(--font-display); font-weight: 600; }
-.view-id{ font-family: var(--font-mono); font-size: 11.5px; color: var(--slate); margin-top: 2px; }
+.view-name { font-size: 18px; font-family: var(--font-display); font-weight: 600; }
+.view-id { font-family: var(--font-mono); font-size: 12px; color: var(--slate); margin-top: 2px; }
 
-.view-details{
-  margin-top: 20px;
-  display: grid; grid-template-columns: 1fr 1fr; gap: 16px 20px;
+.view-section-title {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--brass-deep);
+  border-bottom: 1px dashed var(--line);
+  padding-bottom: 4px;
+  margin-top: 14px;
+  margin-bottom: -4px;
 }
-.vd-item .vd-label{
+.view-section-title:first-child {
+  margin-top: 0;
+}
+
+.view-details {
+  margin-top: 16px;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px;
+}
+.vd-item .vd-label {
   font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em;
-  color: var(--slate); font-weight: 700; margin-bottom: 4px;
+  color: var(--slate); font-weight: 700; margin-bottom: 3px;
 }
-.vd-item .vd-value{ font-size: 13.5px; color: var(--ink); font-weight: 500; }
+.vd-item .vd-value { font-size: 13.5px; color: var(--ink); font-weight: 500; word-break: break-word; }
 
-@media (max-width: 620px){
-  .view-details{ grid-template-columns: 1fr; }
+/* Deactivation Options Box */
+.deactivate-box {
+  background: var(--surface-subtle, #fbfaf8);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 14px 0;
+  font-size: 13px;
+  text-align: left;
+}
+.deactivate-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+.deactivate-option:last-child {
+  margin-bottom: 0;
+}
+.deactivate-option input[type="radio"] {
+  margin-top: 3px;
+}
+.deactivate-option-title {
+  font-weight: 600;
+  color: var(--ink);
+}
+.deactivate-option-desc {
+  font-size: 11.5px;
+  color: var(--slate);
+  margin-top: 2px;
+}
+
+@media (max-width: 620px) {
+  .view-details { grid-template-columns: 1fr; }
 }
